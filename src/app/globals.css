@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+/* ================================================
+   DESIGN TOKENS — Wangun v1
+   Sumber: design-tokens-wangun-v1.md (ACUAN RESMI)
+   ================================================ */
+:root {
+  /* Background layers */
+  --color-bg-base:       hsl(222, 14%, 9%);
+  --color-bg-surface:    hsl(222, 14%, 12%);
+  --color-bg-elevated:   hsl(222, 14%, 16%);
+  --color-bg-overlay:    hsl(222, 14%, 20%);
+
+  /* Borders */
+  --color-border:        hsl(222, 14%, 22%);
+  --color-border-strong: hsl(222, 14%, 30%);
+
+  /* Teks */
+  --color-text-primary:  hsl(220, 14%, 92%);  /* 15.0:1 AAA */
+  --color-text-muted:    hsl(220, 10%, 55%);  /* 4.8:1 AA */
+  --color-text-faint:    hsl(220, 10%, 35%);
+
+  /* Aksen — satu-satunya warna non-netral */
+  --color-accent:        hsl(234, 89%, 72%);  /* 5.6:1 AA — dikoreksi dari 63% */
+  --color-accent-hover:  hsl(234, 89%, 79%);
+  --color-accent-subtle: hsl(234, 89%, 72%, 0.12);
+
+  /* Status — hanya untuk feedback fungsional */
+  --color-success: hsl(150, 60%, 45%);
+  --color-warning: hsl(40,  80%, 52%);
+  --color-error:   hsl(0,   72%, 55%);
+  --color-info:    var(--color-accent);
+
+  /* Tipografi */
+  --font-ui:   'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  /* Spacing */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Border radius */
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
+
+  /* Shadow — hanya untuk elemen float */
+  --shadow-float: 0 4px 16px hsl(222, 14%, 5%, 0.6);
+}
+
+/* Base styles */
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+}
+
+/* Monospace areas (kode, terminal, inline code) */
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+}

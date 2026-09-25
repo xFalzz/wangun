@@ -1,0 +1,9 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    // Larang any yang tidak eksplisit — sesuai prinsip strict TypeScript
+    "@typescript-eslint/no-explicit-any": "warn",
+    // Console.log diizinkan di development tapi warning di production
+    "no-console": ["warn", { "allow": ["warn", "error"] }]
+  }
+}
