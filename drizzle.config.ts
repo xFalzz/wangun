@@ -5,9 +5,11 @@ export default {
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    // Untuk migrasi (DDL) wajib pakai koneksi UNPOOLED — pgbouncer tidak
+    // mendukung CREATE TABLE / ALTER TABLE. DATABASE_URL_UNPOOLED adalah
+    // koneksi langsung ke Postgres tanpa proxy.
+    url: process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL!,
   },
-  // Verbose logging saat generate/push migration
   verbose: true,
   strict: true,
 } satisfies Config;
