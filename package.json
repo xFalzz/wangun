@@ -18,7 +18,7 @@
   "dependencies": {
     "ai": "^4.3.16",
     "bcryptjs": "^3.0.2",
-    "drizzle-orm": "^0.44.2",
+    "drizzle-orm": "^0.45.3",
     "next": "^16.3.6",
     "next-auth": "^5.0.0-beta.29",
     "pg": "^8.16.0",
