@@ -413,7 +413,7 @@ Kolom `source` di `usage_logs` (`internal_chat` vs `api_external`) memungkinkan 
 | Code Editor | **Monaco Editor** (mesin yang sama dipakai VSCode) | Syntax highlighting, multi-tab, integrasi mudah dengan React/Next.js |
 | Terminal | **xterm.js** | Render terminal di browser, terhubung via WebSocket ke proses di container |
 | Virtual File System | Disimpan di `files` (database) untuk persistensi + disinkronkan ke volume container saat workspace aktif | Sumber kebenaran file ada di database, container cuma "runtime" |
-| Sandbox Manager | Docker container per workspace, dibuat saat dibuka & dimatikan setelah idle | Isolasi penuh — tidak ada akses ke sistem lain atau workspace user lain |
+| Sandbox Manager | **Layanan sandbox terkelola (E2B atau sejenis)** — bukan Docker, karena tidak ada Docker di lingkungan development | Isolasi penuh — tidak ada akses ke sistem lain atau workspace user lain |
 
 ### Alur kerja workspace
 
@@ -800,10 +800,10 @@ erDiagram
 | Database utama | **PostgreSQL** | Free tier di Supabase/Neon |
 | Vector DB | **pgvector** | Satu infra dengan Postgres |
 | Queue/task async | **Redis + BullMQ** | Agent task & provisioning container |
-| Sandbox eksekusi kode (Pilar 1) | Docker container umum, network dimatikan | Untuk `run_code` biasa |
+| Sandbox eksekusi kode (Pilar 1) | **Layanan sandbox terkelola (E2B atau sejenis)** — bukan Docker, karena tidak ada Docker terpasang di lingkungan development | Untuk `run_code` biasa |
 | **Code Editor (Pilar 3)** | **Monaco Editor** | Mesin sama dengan VSCode, gratis, open-source |
 | **Terminal (Pilar 3)** | **xterm.js** + WebSocket | Terminal browser standar industri |
-| **Sandbox per workspace (Pilar 3)** | Docker container dedicated per workspace, atau layanan terkelola (E2B) kalau ops Docker sendiri terasa berat | Isolasi kuat, lifecycle idle-timeout |
+| **Sandbox per workspace (Pilar 3)** | **Layanan sandbox terkelola (E2B atau sejenis)** — bukan Docker container sendiri, karena lingkungan development tidak punya Docker | Isolasi kuat, lifecycle idle-timeout, tanpa perlu ops Docker sama sekali |
 | Hosting | **Vercel** (frontend) + **Railway/Fly.io** (backend, router, sandbox manager) | Free tier untuk MVP |
 | Auth | **Auth.js (NextAuth)** atau **Supabase Auth** | Cepat setup |
 

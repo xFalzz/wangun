@@ -18,8 +18,10 @@ Langkah:
 3. Install semua dependency yang disebut di atas, plus `drizzle-orm`, `drizzle-kit`, `pg`, `next-auth@beta`, `bcrypt`, `zod`
 4. Setup `tsconfig.json` (strict: true), ESLint, Prettier dengan config standar Next.js
 5. Buat `.env.example` berisi semua variabel yang akan dibutuhkan: `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GEMINI_API_KEY`, `DEEPSEEK_API_KEY`
-6. Buat `docker-compose.yml` untuk PostgreSQL + ekstensi pgvector khusus development lokal
+⚠️ **Database TIDAK memakai Docker/Docker Compose** — saya tidak punya dan tidak mau pakai Docker sama sekali di project ini, untuk development maupun nanti. Database Postgres (dengan ekstensi pgvector) akan memakai **layanan hosted gratis** (Neon — pilihan utama karena native support pgvector dan free tier generous; Supabase sebagai alternatif). Jangan buat `docker-compose.yml` atau file Docker apapun.
 
-**Larangan eksplisit**: jangan install LangChain, LangGraph, atau agent framework apapun — Agent Orchestrator akan ditulis manual di prompt build berikutnya (sesuai prinsip "dari nol" di Blueprint Bagian 2). Jangan buat halaman/komponen UI apapun dulu di prompt ini — murni setup project.
+6. Di `.env.example`, tambahkan komentar penjelasan singkat bahwa `DATABASE_URL` diisi dari connection string layanan Postgres hosted (Neon/Supabase), bukan database lokal
 
-Output akhir: tampilkan struktur folder final, isi `package.json`, dan cara menjalankan `docker-compose up` + `npm run dev`.
+**Larangan eksplisit**: jangan install LangChain, LangGraph, atau agent framework apapun — Agent Orchestrator akan ditulis manual di prompt build berikutnya (sesuai prinsip "dari nol" di Blueprint Bagian 2). Jangan buat halaman/komponen UI apapun dulu di prompt ini — murni setup project. Jangan buat file Docker/docker-compose apapun (lihat aturan database di atas).
+
+Output akhir: tampilkan struktur folder final, isi `package.json`, dan cara menjalankan `npm run dev` (setelah `DATABASE_URL` di `.env.local` diisi dari dashboard Neon/Supabase).
