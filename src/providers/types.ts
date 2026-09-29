@@ -137,6 +137,15 @@ export function classifyHttpError(
         false
       );
 
+    case 403:
+      // Model diblokir di level project/permission (mis: Groq project limits)
+      // Bukan bug di kode kita — coba model berikutnya
+      throw new ProviderFallbackError(
+        `[${providerName}/${modelId}] HTTP 403: Model diblokir (permission). Body: ${body.slice(0, 300)}`,
+        403,
+        false
+      );
+
     default:
       // 400, dll — bug di kode kita, fatal
       throw new ProviderFatalError(
