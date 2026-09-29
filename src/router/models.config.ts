@@ -115,11 +115,12 @@ export const routerConfig: RouterConfig = {
     // ——————————————————————————————————————
     // TIER 1-B: Groq
     // Cek model aktif: GET https://api.groq.com/openai/v1/models (Authorization: Bearer {key})
-    // Diverifikasi 2026-09-26 — model yang diminta (llama-4-maverick, kimi-k2)
-    // TIDAK tersedia di key ini. Yang aktif dan tersedia:
-    //   - qwen/qwen3.8-27b    (131k ctx, reasoning+)
-    //   - openai/gpt-oss-120b (131k ctx, general)
-    //   - openai/gpt-oss-20b  (131k ctx, fast/cheap)
+    // Diverifikasi 2026-09-26.
+    //
+    // PRIMARY: openai/gpt-oss-120b (terbukti bekerja via live test 2026-09-29, kualitas lebih tinggi)
+    // FALLBACK-1: openai/gpt-oss-20b (terbukti bekerja via live test 2026-09-29, fast/cheap)
+    // FALLBACK-2: qwen/qwen3.8-27b (saat ini diblokir HTTP 403 di project level di console Groq,
+    //             ditaruh di fallback terakhir agar tidak menghalangi jalur utama sebelum di-enable manual)
     // Format: pakai OpenAI-compatible endpoint
     // ——————————————————————————————————————
     {
@@ -128,12 +129,6 @@ export const routerConfig: RouterConfig = {
       apiKeyEnv: "GROQ_API_KEY",
       baseUrl: "https://api.groq.com/openai/v1",
       models: [
-        {
-          id: "qwen/qwen3.8-27b",
-          label: "Qwen 3.8 27B (Groq)",
-          contextWindow: 131_072,
-          supportsReasoning: true,
-        },
         {
           id: "openai/gpt-oss-120b",
           label: "GPT OSS 120B (Groq)",
@@ -145,6 +140,12 @@ export const routerConfig: RouterConfig = {
           label: "GPT OSS 20B (Groq)",
           contextWindow: 131_072,
           supportsReasoning: false,
+        },
+        {
+          id: "qwen/qwen3.8-27b",
+          label: "Qwen 3.8 27B (Groq)",
+          contextWindow: 131_072,
+          supportsReasoning: true,
         },
       ],
     },
@@ -271,3 +272,37 @@ export const FALLBACK_HTTP_CODES = new Set([
   404, // model deprecated / tidak tersedia
   500, // server error sementara
 ]);
+
+// ============================================================
+// TOKEN BUDGET DEFAULTS
+// ============================================================
+
+/**
+ * Budget token default terpusat untuk berbagai jenis beban kerja (workload).
+ *
+ * ALASAN & TEMUAN EMPIRIS (2026-09-29):
+ * Model dengan internal reasoning (seperti openai/gpt-oss di Groq atau deepseek-r1)
+ * mengonsumsi 100-200 token untuk penalaran internal SEBELUM menghasilkan kata teks pertama.
+ * Jika max_tokens diset terlalu kecil (< 500 token), budget habis di reasoning dan
+ * menghasilkan output kosong.
+ */
+export const DEFAULT_TOKEN_BUDGETS = {
+  /**
+   * Percakapan interaktif standar / task ringan (Pilar 1 - Chat Engine).
+   * Alokasi: ~200 reasoning tokens + ~1800 output tokens.
+   */
+  chat: 2048,
+
+  /**
+   * Langkah ReAct loop / planning / tool calling (Pilar 1 & 3 - Agent Orchestrator).
+   * Alokasi untuk thought JSON, action parameters, dan reasoning multi-step.
+   */
+  agentPlanning: 4096,
+
+  /**
+   * Penulisan kode penuh / file editing / task berat (Pilar 3 - IDE Workspace).
+   * Alokasi untuk file source code utuh dan analisis mendalam.
+   */
+  agentCode: 8192,
+} as const;
+
