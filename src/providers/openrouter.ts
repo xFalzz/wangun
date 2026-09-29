@@ -1,22 +1,16 @@
 /**
- * Adapter: DeepSeek
+ * Adapter: OpenRouter
  *
- * // TODO: belum di-test live, saldo DeepSeek kosong per 2026-09-29
- * // Isi saldo di platform.deepseek.com, lalu test dengan:
- * //   npx tsx src/db/check-deepseek-models.ts (buat ulang script-nya)
+ * Dokumentasi: https://openrouter.ai/docs
+ * Format: OpenAI-compatible
+ * Diverifikasi model :free aktif 2026-09-26 via GET /api/v1/models
  *
- * Dokumentasi: https://api-docs.deepseek.com
- * Format: OpenAI-compatible (chat/completions endpoint)
- * Diverifikasi model aktif 2026-09-26 via GET /models
+ * Header wajib OpenRouter (selain Authorization):
+ *  - HTTP-Referer: URL aplikasi (dipakai untuk analytics & rate limit per-site)
+ *  - X-Title: nama aplikasi (ditampilkan di dashboard OpenRouter)
  *
- * Error penting:
- *  - 402 Insufficient Balance → provider mati total (isProviderDead=true)
- *    BERBEDA dari 429 rate limit yang transient!
- *    Router harus langsung skip ke provider berikutnya, tanpa retry.
- *
- * Rate limit DeepSeek: berbasis concurrency (bukan RPM/TPM).
- * Pastikan koneksi selalu ditutup setelah streaming selesai supaya
- * tidak menghabiskan "slot" concurrency.
+ * Catatan: OpenRouter adalah Tier 2 — hanya dipakai kalau semua Tier 1 gagal.
+ * Prioritaskan model :free dulu (sudah diurutkan di models.config.ts).
  */
 
 import {
@@ -27,16 +21,16 @@ import {
 } from "./types";
 import { parseOAIStream } from "./groq"; // reuse helper yang sama
 
-export class DeepSeekAdapter implements ModelProviderAdapter {
-  readonly name = "deepseek";
+export class OpenRouterAdapter implements ModelProviderAdapter {
+  readonly name = "openrouter";
   readonly modelId: string;
 
   private readonly apiKey: string;
-  private readonly baseUrl = "https://api.deepseek.com";
+  private readonly baseUrl = "https://openrouter.ai/api/v1";
 
   constructor(modelId: string) {
-    const key = process.env.DEEPSEEK_API_KEY;
-    if (!key) throw new Error("DEEPSEEK_API_KEY tidak diset di environment");
+    const key = process.env.OPENROUTER_API_KEY;
+    if (!key) throw new Error("OPENROUTER_API_KEY tidak diset di environment");
     this.modelId = modelId;
     this.apiKey = key;
   }
@@ -45,6 +39,9 @@ export class DeepSeekAdapter implements ModelProviderAdapter {
     return {
       Authorization: `Bearer ${this.apiKey}`,
       "Content-Type": "application/json",
+      // Wajib oleh OpenRouter — dipakai untuk analytics per-site
+      "HTTP-Referer": process.env.NEXTAUTH_URL ?? "http://localhost:3000",
+      "X-Title": "Wangun AI Platform",
     };
   }
 
@@ -66,13 +63,11 @@ export class DeepSeekAdapter implements ModelProviderAdapter {
 
     if (!res.ok) {
       const errBody = await res.text();
-      // classifyHttpError menangani 402 sebagai isProviderDead=true:
-      // router langsung skip ke provider berikutnya tanpa retry
       classifyHttpError(res.status, errBody, this.name, this.modelId);
     }
 
     const data = await res.json() as {
-      choices: Array<{ message: { content: string } }>;
+      choices: Array<{ message: { content: string | null } }>;
       usage?: { total_tokens?: number; prompt_tokens?: number; completion_tokens?: number };
     };
 
@@ -106,14 +101,7 @@ export class DeepSeekAdapter implements ModelProviderAdapter {
       classifyHttpError(res.status, errBody, this.name, this.modelId);
     }
 
-    if (!res.body) throw new Error("Response body kosong dari DeepSeek stream");
-
-    // Pastikan stream selalu ditutup — DeepSeek rate limit berbasis concurrency,
-    // koneksi yang tidak ditutup menghabiskan "slot" secara permanen
-    try {
-      yield* parseOAIStream(res.body);
-    } finally {
-      // parseOAIStream sudah memanggil reader.releaseLock() di finallynya
-    }
+    if (!res.body) throw new Error("Response body kosong dari OpenRouter stream");
+    yield* parseOAIStream(res.body);
   }
 }
